@@ -4,10 +4,11 @@ from services.models import Service, Slot
 
 
 class ServiceSerializer(serializers.ModelSerializer):
+    owner = serializers.StringRelatedField()
+
     class Meta:
         model = Service
         fields = ['id', 'name', 'description', 'owner', 'is_active', 'duration_minutes']
-        read_only_fields = ['owner']
 
 
 class SlotSerializer(serializers.ModelSerializer):
