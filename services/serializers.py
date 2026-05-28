@@ -10,6 +10,16 @@ class ServiceSerializer(serializers.ModelSerializer):
         model = Service
         fields = ['id', 'name', 'description', 'owner', 'is_active', 'duration_minutes']
 
+    def validate(self, data):
+        if self.instance and 'duration_minutes' in data:
+            new_duration = data['duration_minutes']
+            if new_duration != self.instance.duration_minutes:
+                if self.instance.slot_set.filter(is_booked=True).exists():
+                    raise serializers.ValidationError({
+                        'duration_minutes': 'Cannot change duration while active bookings exist.'
+                    })
+        return data
+
 
 class SlotSerializer(serializers.ModelSerializer):
     service = ServiceSerializer(read_only=True)
@@ -30,6 +40,11 @@ class SlotSerializer(serializers.ModelSerializer):
         start = data['start_time']
         end = data['end_time']
 
+        if self.instance and self.instance.is_booked:
+            raise serializers.ValidationError(
+                'Cannot modify a slot that has an active booking.'
+            )
+
         if service and service.owner != request.user:
             raise serializers.ValidationError(
                 {'service': 'You can only create slots for your own services'}
@@ -46,5 +61,19 @@ class SlotSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {'end_time': f'end_time must be exactly {service.duration_minutes} minutes after start_time'}
                 )
+        
+        overlapping = Slot.objects.filter(
+            service=service,
+            start_time__lt=end,
+            end_time__gt=start
+        )
+
+        if self.instance:
+            overlapping = overlapping.exclude(id=self.instance.id)
+        if overlapping.exists():
+            raise serializers.ValidationError(
+                {'start_time': 'A slot already exists for this service at this time.'}
+        )
 
         return data
+    
