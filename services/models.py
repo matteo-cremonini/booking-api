@@ -5,6 +5,9 @@ from django.conf import settings
 
 
 class Service(models.Model):
+    class Meta:
+        ordering = ['-id']
+
     name = models.CharField(max_length=255)
     description = models.TextField()
     is_active = models.BooleanField(default=True)
@@ -18,6 +21,9 @@ class Service(models.Model):
         return self.name
 
 class Slot(models.Model):
+    class Meta:
+        ordering = ['start_time']
+        
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()

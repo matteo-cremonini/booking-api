@@ -3,6 +3,9 @@ from django.db import models
 from django.conf import settings
 
 class Booking(models.Model):
+    class Meta:
+        ordering = ['-created_at']
+        
     class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'
         CONFIRMED = 'confirmed', 'Confirmed'
