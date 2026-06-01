@@ -37,8 +37,8 @@ class SlotSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context['request']
         service = data.get('service')
-        start = data['start_time']
-        end = data['end_time']
+        start = data.get('start_time', getattr(self.instance, 'start_time', None))
+        end = data.get('end_time', getattr(self.instance, 'end_time', None))
 
         if self.instance and self.instance.is_booked:
             raise serializers.ValidationError(

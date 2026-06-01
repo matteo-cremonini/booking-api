@@ -10,7 +10,7 @@ from rest_framework import status
 
 class BookingViewSet(ModelViewSet):
     serializer_class = BookingSerializer
-    http_method_names = ['get', 'post', 'delete', 'head', 'options']
+    http_method_names = ['get', 'post', 'head', 'options']
 
     def get_queryset(self):
         user = self.request.user
