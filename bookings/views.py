@@ -23,7 +23,7 @@ class BookingViewSet(ModelViewSet):
             return [IsClient()]
         if self.action == 'confirm':
             return [IsProvider()]
-        if self.action in ['cancel', 'retrieve', 'list', 'destroy']:
+        if self.action in ['cancel', 'retrieve', 'list']:
             return [IsAuthenticated()]
         return [IsAuthenticated()]
 
