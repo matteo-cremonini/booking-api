@@ -4,6 +4,15 @@ import dj_database_url
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = False
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
-CSRF_TRUSTED_ORIGINS = [f'https://{host}' for host in ALLOWED_HOSTS if host]
-DATABASES = {'default': dj_database_url.config(conn_max_age=600, conn_health_checks=True)}
+
+_railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', '')
+_allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = (
+    [h.strip() for h in _allowed_hosts_env.split(',') if h.strip()]
+    or ([_railway_domain] if _railway_domain else [])
+)
+CSRF_TRUSTED_ORIGINS = [f'https://{_railway_domain}'] if _railway_domain else []
+
+DATABASES = {
+    'default': dj_database_url.config(conn_max_age=600, conn_health_checks=True)
+}
