@@ -4,6 +4,7 @@ from bookings.models import Booking
 from services.models import Slot
 from services.serializers import SlotSerializer
 
+
 class BookingSerializer(serializers.ModelSerializer):
     client = serializers.StringRelatedField()
     slot = SlotSerializer(read_only=True)
@@ -15,7 +16,7 @@ class BookingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Booking
-        fields = [ 'id', 'client', 'slot', 'slot_id', 'created_at', 'updated_at', 'status']
+        fields = ['id', 'client', 'slot', 'slot_id', 'created_at', 'updated_at', 'status']
         read_only_fields = ['created_at', 'updated_at', 'status']
 
     
