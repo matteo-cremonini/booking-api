@@ -6,10 +6,13 @@ from .serializers import ServiceSerializer, SlotSerializer
 from rest_framework.response import Response
 from rest_framework import status 
 from datetime import timedelta
+from .filters import ServiceFilter, SlotFilter   
+
 
 
 class ServiceViewSet(ModelViewSet):
     serializer_class = ServiceSerializer
+    filterset_class = ServiceFilter
 
     def get_queryset(self):
         user = self.request.user
@@ -45,6 +48,7 @@ class ServiceViewSet(ModelViewSet):
 
 class SlotViewSet(ModelViewSet):
     serializer_class = SlotSerializer
+    filterset_class = SlotFilter
 
     def get_queryset(self):
         user = self.request.user

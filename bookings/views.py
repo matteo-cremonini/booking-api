@@ -6,12 +6,14 @@ from .serializers import BookingSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from bookings.filters import BookingFilter
 
 
 class BookingViewSet(ModelViewSet):
     serializer_class = BookingSerializer
+    filterset_class = BookingFilter
     http_method_names = ['get', 'post', 'head', 'options']
-
+    
     def get_queryset(self):
         user = self.request.user
         if user.role == 'provider':
