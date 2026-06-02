@@ -137,3 +137,22 @@ class BookingTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 1)
+
+    def test_filter_bookings_by_status(self):
+        slot2 = Slot.objects.create(
+            service=self.service,
+            start_time=datetime(2026, 7, 2, 9, 0, tzinfo=timezone.utc),
+            end_time=datetime(2026, 7, 2, 9, 30, tzinfo=timezone.utc),
+            price='25.00',
+        )
+        Booking.objects.create(
+            client=self.client_user, slot=self.slot, status=Booking.Status.PENDING
+        )
+        Booking.objects.create(
+            client=self.client_user, slot=slot2, status=Booking.Status.CONFIRMED
+        )
+
+        response = self.client.get(self.list_url, {'status': 'pending'})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)

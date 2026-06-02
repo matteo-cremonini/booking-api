@@ -96,6 +96,20 @@ class ServiceTests(APITestCase):
             [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND]
         )
 
+    def test_filter_services_by_active(self):
+        Service.objects.create(
+            owner=self.provider,
+            name='Inactive Service',
+            description='',
+            duration_minutes=30,
+            is_active=False,
+        )
+
+        response = self.client.get(self.list_url, {'is_active': 'false'})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
+
 
 class SlotTests(APITestCase):
 
@@ -196,3 +210,51 @@ class SlotTests(APITestCase):
         response = self.client.delete(f'/api/slots/{self.slot.id}/')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_filter_slots_by_service(self):
+        service2 = Service.objects.create(
+            owner=self.provider,
+            name='Massage',
+            description='',
+            duration_minutes=60,
+            is_active=True,
+        )
+        Slot.objects.create(
+            service=service2,
+            start_time=datetime(2026, 7, 2, 9, 0, tzinfo=timezone.utc),
+            end_time=datetime(2026, 7, 2, 10, 0, tzinfo=timezone.utc),
+            price='50.00',
+        )
+
+        response = self.client.get(self.list_url, {'service': self.service.id})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
+
+    def test_filter_slots_by_date(self):
+        Slot.objects.create(
+            service=self.service,
+            start_time=datetime(2026, 7, 2, 9, 0, tzinfo=timezone.utc),
+            end_time=datetime(2026, 7, 2, 9, 30, tzinfo=timezone.utc),
+            price='25.00',
+        )
+
+        response = self.client.get(self.list_url, {'start_date': '2026-07-01'})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
+
+    def test_filter_slots_by_is_booked(self):
+        self.slot.is_booked = True
+        self.slot.save()
+        Slot.objects.create(
+            service=self.service,
+            start_time=datetime(2026, 7, 2, 9, 0, tzinfo=timezone.utc),
+            end_time=datetime(2026, 7, 2, 9, 30, tzinfo=timezone.utc),
+            price='25.00',
+        )
+
+        response = self.client.get(self.list_url, {'is_booked': 'true'})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
