@@ -10,27 +10,27 @@ Providers create services and time slots. Clients browse and book appointments.
 
 ## Live Demo
 
-**Base URL:** `https://[URL-RAILWAY]`
+**Base URL:** `https://booking-api-production-51cd.up.railway.app`
 
 > ⚠️ The demo database may be reset periodically.
 
 ### Try it in the browser — Browsable API
 
-1. Open [/api-auth/login/](https://[URL-RAILWAY]/api-auth/login/)
+1. Open [/api-auth/login/](https://booking-api-production-51cd.up.railway.app/api-auth/login/)
 2. Log in with one of the demo credentials below
 3. Navigate to any endpoint and interact directly from the browser
 
 **Provider account**
 | Field | Value |
 |-------|-------|
-| Username | `provider_demo` |
-| Password | `demo1234` |
+| Username | `testprovider` |
+| Password | `testpassword` |
 
 **Client account**
 | Field | Value |
 |-------|-------|
-| Username | `client_demo` |
-| Password | `demo1234` |
+| Username | `testclient` |
+| Password | `testpassword` |
 
 ### Try it with Postman
 
@@ -38,7 +38,7 @@ Providers create services and time slots. Clients browse and book appointments.
 
 | Variable | Value |
 |----------|-------|
-| `base_url` | `https://[URL-RAILWAY]` |
+| `base_url` | `https://booking-api-production-51cd.up.railway.app` |
 | `access_token` | *(fill after login)* |
 | `refresh_token` | *(fill after login)* |
 
