@@ -1,0 +1,21 @@
+{% extends 'web/base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+  <h1>Benvenuto, {{ user.username }}</h1>
+  <p>Hai effettuato l'accesso come <strong>{{ user.get_role_display }}</strong>.</p>
+
+  {% if user.role == 'provider' %}
+    <h2>Area provider</h2>
+    <ul>
+      <li>I miei servizi <small>(in arrivo)</small></li>
+      <li>I miei slot <small>(in arrivo)</small></li>
+      <li>Prenotazioni ricevute <small>(in arrivo)</small></li>
+    </ul>
+  {% else %}
+    <h2>Area cliente</h2>
+    <ul>
+      <li>Sfoglia i servizi <small>(in arrivo)</small></li>
+      <li>Le mie prenotazioni <small>(in arrivo)</small></li>
+    </ul>
+  {% endif %}
+{% endblock %}

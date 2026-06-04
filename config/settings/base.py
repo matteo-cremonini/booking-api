@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'users',
     'services',
     'bookings',
+    'web',
 ]
 
 MIDDLEWARE = [
@@ -84,3 +85,6 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'

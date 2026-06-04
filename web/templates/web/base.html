@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}booking-api{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <script src="https://unpkg.com/htmx.org@2"></script>
+</head>
+<body>
+  <nav class="container">
+    <ul>
+      <li><strong><a href="{% url 'home' %}">booking-api</a></strong></li>
+    </ul>
+    <ul>
+      {% if user.is_authenticated %}
+        <li>{{ user.username }} ({{ user.get_role_display }})</li>
+        <li>
+          <form action="{% url 'logout' %}" method="post" style="margin:0">
+            {% csrf_token %}
+            <button type="submit" class="secondary outline">Logout</button>
+          </form>
+        </li>
+      {% else %}
+        <li><a href="{% url 'login' %}">Login</a></li>
+        <li><a href="{% url 'register' %}" role="button">Registrati</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <main class="container">
+    {% for message in messages %}
+      <article>{{ message }}</article>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
