@@ -1,0 +1,14 @@
+{% for slot in slots %}
+  <div id="slot-{{ slot.pk }}">
+    {{ slot.start_time|date:"d/m/Y H:i" }} — {{ slot.price }} €
+    {% if user.role == 'client' %}
+      <button hx-post="{% url 'book_slot' slot.pk %}"
+              hx-target="#slot-{{ slot.pk }}"
+              hx-swap="outerHTML">
+        Book
+      </button>
+    {% endif %}
+  </div>
+{% empty %}
+  <p>No slots available for this service.</p>
+{% endfor %}

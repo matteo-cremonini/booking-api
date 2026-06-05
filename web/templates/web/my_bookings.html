@@ -1,0 +1,15 @@
+{% extends 'web/base.html' %}
+{% block title %}My bookings{% endblock %}
+{% block content %}
+<h1>My bookings</h1>
+<table>
+  <thead><tr><th>Service</th><th>When</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for booking in bookings %}
+    {% include 'web/partials/booking_row.html' %}
+  {% empty %}
+    <tr><td colspan="4">You have no bookings yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

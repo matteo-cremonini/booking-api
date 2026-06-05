@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from bookings.permissions import IsProvider, IsSlotOwner
@@ -39,11 +40,12 @@ class ServiceViewSet(ModelViewSet):
     
     def perform_update(self, serializer):
         old_duration = serializer.instance.duration_minutes
-        service = serializer.save()
-        if service.duration_minutes != old_duration:
-            for slot in service.slot_set.filter(is_booked=False):
-                slot.end_time = slot.start_time + timedelta(minutes=service.duration_minutes)
-                slot.save()
+        with transaction.atomic():
+            service = serializer.save()
+            if service.duration_minutes != old_duration:
+                for slot in service.slot_set.filter(is_booked=False):
+                    slot.end_time = slot.start_time + timedelta(minutes=service.duration_minutes)
+                    slot.save()
 
 
 class SlotViewSet(ModelViewSet):

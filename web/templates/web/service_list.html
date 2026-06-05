@@ -1,0 +1,19 @@
+{% extends 'web/base.html' %}
+{% block title %}Services{% endblock %}
+{% block content %}
+<h1>Available services</h1>
+{% for service in services %}
+  <article>
+    <header><strong>{{ service.name }}</strong> — {{ service.duration_minutes }} min</header>
+    <p>{{ service.description }}</p>
+    <button hx-get="{% url 'available_slots' service.pk %}"
+            hx-target="#slots-{{ service.pk }}"
+            hx-swap="innerHTML">
+      View availability
+    </button>
+    <div id="slots-{{ service.pk }}"></div>
+  </article>
+{% empty %}
+  <p>No services available at the moment.</p>
+{% endfor %}
+{% endblock %}
