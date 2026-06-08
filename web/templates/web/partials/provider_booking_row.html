@@ -1,0 +1,23 @@
+<tr id="pbooking-{{ booking.pk }}">
+  <td>{{ booking.slot.service.name }}</td>
+  <td>{{ booking.client }}</td>
+  <td>{{ booking.slot.start_time|date:"d/m/Y H:i" }}</td>
+  <td>{{ booking.get_status_display }}</td>
+  <td>
+    {% if booking.status == 'pending' %}
+      <button hx-post="{% url 'confirm_booking' booking.pk %}"
+              hx-target="#pbooking-{{ booking.pk }}"
+              hx-swap="outerHTML">
+        Confirm
+      </button>
+    {% endif %}
+    {% if booking.status != 'cancelled' %}
+      <button hx-post="{% url 'provider_cancel_booking' booking.pk %}"
+              hx-target="#pbooking-{{ booking.pk }}"
+              hx-swap="outerHTML"
+              class="secondary">
+        Cancel
+      </button>
+    {% endif %}
+  </td>
+</tr>

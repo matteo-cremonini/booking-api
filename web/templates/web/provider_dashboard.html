@@ -1,0 +1,17 @@
+{% extends 'web/base.html' %}
+{% block title %}Provider dashboard{% endblock %}
+{% block content %}
+<h1>Incoming bookings</h1>
+<table>
+  <thead>
+    <tr><th>Service</th><th>Client</th><th>When</th><th>Status</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for booking in bookings %}
+    {% include 'web/partials/provider_booking_row.html' %}
+  {% empty %}
+    <tr><td colspan="5">No bookings yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

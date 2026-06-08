@@ -7,9 +7,8 @@
   {% if user.role == 'provider' %}
     <h2>Provider area</h2>
     <ul>
-      <li>My services <small>(coming soon)</small></li>
-      <li>My slots <small>(coming soon)</small></li>
-      <li>Received bookings <small>(coming soon)</small></li>
+      <li><a href="{% url 'service_list' %}">My services</a></li>
+      <li><a href="{% url 'provider_dashboard' %}">Incoming bookings</a></li>
     </ul>
   {% else %}
     <h2>Client area</h2>
