@@ -1,105 +1,43 @@
 # booking-api
 
 > 📌 **Portfolio project** — built as a demonstration for recruiters and technical reviewers.
-> Live demo available, see [Live Demo](#live-demo) below.
+> Live demo available, see [Web Interface — Live Demo](#web-interface--live-demo) below.
 
-Multi-tenant booking REST API built with Django REST Framework.
+Multi-tenant booking platform built with Django REST Framework and an htmx web frontend.
 Providers create services and time slots. Clients browse and book appointments.
+Both a full REST API and a server-rendered web interface run on the same Django project.
 
 ---
 
-## Live Demo
+## Web Interface — Live Demo
 
-**Base URL:** `https://booking-api-production-51cd.up.railway.app`
+**[booking-api-production-51cd.up.railway.app](https://booking-api-production-51cd.up.railway.app)**
 
 > ⚠️ The demo database may be reset periodically.
 
-### Try it in the browser — Browsable API
+| Role       | Username        | Password       |
+|------------|-----------------|----------------|
+| Provider   | `testprovider`  | `testpassword` |
+| Provider 2 | `testprovider2` | `testpassword` |
+| Client     | `testclient`    | `testpassword` |
 
-1. Open [/api-auth/login/](https://booking-api-production-51cd.up.railway.app/api-auth/login/)
-2. Log in with one of the demo credentials below
-3. Navigate to any endpoint and interact directly from the browser
+- **testclient** — browse services, book slots, view and cancel own bookings
+- **testprovider** — view incoming bookings, confirm or cancel them
 
-**Provider account**
-| Field | Value |
-|-------|-------|
-| Username | `testprovider` |
-| Password | `testpassword` |
+> ⚠️ Slot creation is only available via API in this version.
 
-**Client account**
-| Field | Value |
-|-------|-------|
-| Username | `testclient` |
-| Password | `testpassword` |
+### Browsable API
 
-### Try it with Postman
+Log in at [/api/auth/login/](https://booking-api-production-51cd.up.railway.app/api/auth/login/)
+with the demo credentials above, then navigate to any endpoint below.
 
-**Environment setup**
-
-| Variable | Value |
-|----------|-------|
-| `base_url` | `https://booking-api-production-51cd.up.railway.app` |
-| `access_token` | *(fill after login)* |
-| `refresh_token` | *(fill after login)* |
-
-**Authentication**
-
-Set `base_url`, then send `POST /api/auth/login/` with the demo credentials.
-Copy the tokens from the response into `access_token` and `refresh_token`.
-All requests use `Bearer {{access_token}}` via the collection Authorization tab.
-
-> 💡 You can use a Postman post-response script to automate token saving.
-
----
-
-## Tech Stack
-- Python 3.12
-- Django 6.0
-- Django REST Framework
-- JWT Authentication (djangorestframework-simplejwt)
-- Role-based permissions — custom IsProvider, IsClient, IsSlotOwner
-- django-filter — query parameter filtering
-- PostgreSQL (production) / SQLite (development)
-- Docker + Nginx (local development)
-- Deployed on Railway
-
----
-
-## Architecture
-
-Multi-tenant: single database, multiple independent providers.
-Each provider manages their own services and slots. Data isolation is enforced
-via queryset filtering — cross-provider access returns 404, not 403.
-
-**Roles**
-- **Provider** — creates services and slots, views and manages own bookings
-- **Client** — browses active services and available slots, creates bookings
-
-**Booking flow**
-1. Client books an available slot → status `PENDING`, slot marked as booked
-2. Provider confirms → status `CONFIRMED`
-3. Either party cancels → status `CANCELLED`, slot released
-
----
-
-## Models
-- **Service** — a bookable offering (name, description, duration, active flag) owned by a provider
-- **Slot** — a time window for a service (start/end time, price, booked flag)
-- **Booking** — a client's reservation of a slot (status: pending / confirmed / cancelled)
-
----
-
-## Authentication
+**Auth**
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | /api/auth/register/client/ | Register as client |
 | POST | /api/auth/register/provider/ | Register as provider |
 | POST | /api/auth/login/ | Get JWT token pair |
 | POST | /api/auth/token/refresh/ | Refresh access token |
-
----
-
-## API Endpoints
 
 **Services** *(providers: own only / clients: all active)*
 | Method | Endpoint | Description |
@@ -128,9 +66,7 @@ via queryset filtering — cross-provider access returns 404, not 403.
 | POST | /api/bookings/{id}/confirm/ | Confirm booking *(provider only)* |
 | POST | /api/bookings/{id}/cancel/ | Cancel booking *(provider or client)* |
 
----
-
-## Query Filters
+**Query Filters**
 | Endpoint | Parameter | Example | Description |
 |----------|-----------|---------|-------------|
 | /api/services/ | is_active | ?is_active=false | Filter by active status |
@@ -139,13 +75,71 @@ via queryset filtering — cross-provider access returns 404, not 403.
 | /api/slots/ | is_booked | ?is_booked=true | Filter by availability |
 | /api/bookings/ | status | ?status=pending | Filter by booking status |
 
+### Postman
+
+Use JWT — send `POST /api/auth/login/` to get tokens, then authorize all requests with `Bearer {{access_token}}`.
+
+| Variable | Value |
+|----------|-------|
+| `base_url` | `https://booking-api-production-51cd.up.railway.app` |
+| `access_token` | *(fill after login)* |
+| `refresh_token` | *(fill after login)* |
+
+Copy the tokens from the login response into `access_token` and `refresh_token`.
+All requests use `Bearer {{access_token}}` via the collection Authorization tab.
+
+> 💡 You can use a Postman post-response script to automate token saving.
+
 ---
 
-## Security
-- JWT authentication required for all endpoints
+## Tech Stack
+
+**Backend / API**
+- Python 3.12, Django 6.0, Django REST Framework
+- JWT Authentication (djangorestframework-simplejwt)
+- Role-based permissions — custom IsProvider, IsClient, IsSlotOwner
+- django-filter — query parameter filtering
+- PostgreSQL (production) / SQLite (development)
+
+**Web frontend**
+- htmx — server-driven partial updates, no JavaScript written by hand
+- Pico CSS — minimal classless CSS framework
+- Django session authentication (independent of the JWT API)
+
+**Infrastructure**
+- Docker + Nginx (local development)
+- Deployed on Railway
+
+---
+
+## Architecture
+
+Multi-tenant: single database, multiple independent providers.
+Each provider manages their own services and slots. Data isolation is enforced
+via queryset filtering — cross-provider access returns 404, not 403.
+
+**Roles**
+- **Provider** — creates services and slots, views and manages own bookings
+- **Client** — browses active services and available slots, creates bookings
+
+**Data model**
+- **Service** — a bookable offering (name, description, duration, active flag) owned by a provider
+- **Slot** — a time window for a service (start/end time, price, booked flag)
+- **Booking** — a client's reservation of a slot (status: pending / confirmed / cancelled)
+
+**Booking flow**
+1. Client books an available slot → status `PENDING`, slot marked as booked
+2. Provider confirms → status `CONFIRMED`
+3. Either party cancels → status `CANCELLED`, slot released
+
+---
+
+## Security & Concurrency
+- JWT authentication required for all API endpoints; session auth for the web interface
 - Role-based access: providers and clients have distinct permissions on every endpoint
 - Data isolation via queryset filtering — cross-user access returns 404, not 403
-- Slot double-booking prevented at serializer validation level
+- Slot double-booking prevented with `select_for_update()` row-level locking inside
+  `transaction.atomic()` — API and web share the same service layer, lock applied on every write path
 
 ---
 
@@ -162,6 +156,8 @@ via queryset filtering — cross-provider access returns 404, not 403.
 | 7 | django-filter — query parameter filtering | ✅ |
 | 8 | Docker local environment — Django + PostgreSQL + Nginx | ✅ |
 | 9 | Deploy on Railway with PostgreSQL | ✅ |
+| 10 | Web frontend — htmx + Pico CSS, client and provider flows | ✅ |
+| 11 | Concurrency — service layer with select_for_update, race condition eliminated | ✅ |
 
 ---
 
@@ -192,3 +188,16 @@ Runs Django + PostgreSQL + Nginx. API available at `http://localhost`.
 ```bash
 python manage.py test
 ```
+
+---
+
+## Seed Demo Data
+```bash
+# Local (Docker)
+docker compose exec web python manage.py seed_demo
+
+# Railway (production)
+railway run python manage.py seed_demo
+```
+
+Creates a provider (`testprovider`), a client (`testclient`), a sample service, and slots for the next 7 days. Idempotent — safe to re-run at any time.

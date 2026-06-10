@@ -2,6 +2,7 @@
 {% block title %}My bookings{% endblock %}
 {% block content %}
 <h1>My bookings</h1>
+<div style="overflow-x:auto">
 <table>
   <thead><tr><th>Service</th><th>When</th><th>Status</th><th></th></tr></thead>
   <tbody>
@@ -12,4 +13,5 @@
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}
