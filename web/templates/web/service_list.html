@@ -4,7 +4,7 @@
 <h1>Available services</h1>
 {% for service in services %}
   <article>
-    <header><strong>{{ service.name }}</strong> — {{ service.duration_minutes }} min</header>
+    <header><strong>{{ service.name }}</strong> — {{ service.duration_minutes }} min - {{ service.owner.username }}</header>
     <p>{{ service.description }}</p>
     <button hx-get="{% url 'available_slots' service.pk %}"
             hx-target="#slots-{{ service.pk }}"
