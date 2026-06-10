@@ -1,8 +1,10 @@
-from urllib import request
-
+from bookings.services import (
+    book_slot as book_slot_service,
+    cancel_booking as cancel_booking_service,
+    SlotUnavailable,
+)
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.http import require_POST
 from services.models import Service, Slot
@@ -37,11 +39,12 @@ def service_list(request):
         services = Service.objects.filter(is_active=True)
     return render(request, 'web/service_list.html', {'services': services})
 
-
+@login_required
 def available_slots(request, pk):
     service = get_object_or_404(Service, pk=pk, is_active=True)
     slots = Slot.objects.filter(service=service, is_booked=False)  
     return render(request, 'web/partials/slot_list.html', {'service': service, 'slots': slots})
+
 
 
 @login_required
@@ -50,18 +53,13 @@ def book_slot(request, slot_id):
     if request.user.role != 'client':
         return render(request, 'web/partials/booking_message.html',
                       {'message': 'Only clients can make bookings.', 'ok': False})
-    # TODO week 3: wrap with select_for_update() to prevent race conditions on concurrent bookings.
-    slot = get_object_or_404(Slot, pk=slot_id)
-    if slot.is_booked:
+    try:
+        book_slot_service(request.user, slot_id)
+    except SlotUnavailable:
         return render(request, 'web/partials/booking_message.html',
                       {'message': 'This slot is no longer available.', 'ok': False})
-    with transaction.atomic():
-        Booking.objects.create(client=request.user, slot=slot)
-        slot.is_booked = True
-        slot.save()
     return render(request, 'web/partials/booking_message.html',
-                  {'message': 'Booking requested — pending..', 'ok': True})
-
+                  {'message': "Booking requested — pending confirmation.", 'ok': True})
 
 @login_required
 def my_bookings(request):
@@ -75,12 +73,7 @@ def my_bookings(request):
 @require_POST
 def cancel_booking(request, pk):
     booking = get_object_or_404(Booking, pk=pk, client=request.user)
-    if booking.status != Booking.Status.CANCELLED:
-        with transaction.atomic():
-            booking.status = Booking.Status.CANCELLED
-            booking.slot.is_booked = False
-            booking.slot.save()
-            booking.save()
+    cancel_booking_service(booking)
     return render(request, 'web/partials/booking_row.html', {'booking': booking})
 
 @login_required
@@ -105,10 +98,5 @@ def confirm_booking(request, pk):
 @require_POST
 def provider_cancel_booking(request, pk):
     booking = get_object_or_404(Booking, pk=pk, slot__service__owner=request.user)
-    if booking.status != Booking.Status.CANCELLED:
-        with transaction.atomic():
-            booking.status = Booking.Status.CANCELLED
-            booking.slot.is_booked = False
-            booking.slot.save()
-            booking.save()
+    cancel_booking_service(booking)
     return render(request, 'web/partials/provider_booking_row.html', {'booking': booking})

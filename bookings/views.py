@@ -1,7 +1,12 @@
-from django.db import transaction
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ValidationError
 from bookings.permissions import IsProvider, IsClient
+from bookings.services import (
+    book_slot as book_slot_service,
+    cancel_booking as cancel_booking_service,
+    SlotUnavailable,
+)
 from .models import Booking
 from .serializers import BookingSerializer
 from rest_framework.decorators import action
@@ -31,10 +36,11 @@ class BookingViewSet(ModelViewSet):
         return [IsAuthenticated()]
 
     def perform_create(self, serializer):
-        with transaction.atomic():
-            booking = serializer.save(client=self.request.user)
-            booking.slot.is_booked = True
-            booking.slot.save()
+        slot = serializer.validated_data['slot']
+        try:
+            serializer.instance = book_slot_service(self.request.user, slot.pk)
+        except SlotUnavailable:
+            raise ValidationError({'slot_id': 'This slot is no longer available.'})
 
     @action(detail=True, methods=['post'], permission_classes=[IsProvider])
     def confirm(self, request, pk=None):
@@ -56,9 +62,5 @@ class BookingViewSet(ModelViewSet):
                 {'detail': 'Booking is already cancelled.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        with transaction.atomic():
-            booking.status = Booking.Status.CANCELLED
-            booking.slot.is_booked = False
-            booking.slot.save()
-            booking.save()
+        cancel_booking_service(booking)
         return Response({'detail': 'Booking cancelled.'}, status=status.HTTP_200_OK)

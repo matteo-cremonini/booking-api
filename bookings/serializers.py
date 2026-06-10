@@ -9,7 +9,7 @@ class BookingSerializer(serializers.ModelSerializer):
     client = serializers.StringRelatedField()
     slot = SlotSerializer(read_only=True)
     slot_id = serializers.PrimaryKeyRelatedField(
-        queryset=Slot.objects.filter(is_booked=False),
+        queryset=Slot.objects.all(),
         source='slot',
         write_only=True
     )
