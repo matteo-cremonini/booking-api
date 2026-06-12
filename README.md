@@ -22,9 +22,12 @@ Both a full REST API and a server-rendered web interface run on the same Django 
 | Client     | `testclient`    | `testpassword` |
 
 - **testclient** — browse services, book slots, view and cancel own bookings
-- **testprovider** — view incoming bookings, confirm or cancel them
+- **testprovider** / **testprovider2** — view incoming bookings, confirm or cancel them
 
-> ⚠️ Slot creation is only available via API in this version.
+The database is pre-seeded with 3 services and bookable slots over the next 2 days.
+The two providers demonstrate multi-tenant isolation — each sees only their own services and bookings.
+
+> ⚠️ Service and Slot creation is only available via API in this version.
 
 ### Browsable API
 
@@ -123,8 +126,8 @@ via queryset filtering — cross-provider access returns 404, not 403.
 - **Client** — browses active services and available slots, creates bookings
 
 **Data model**
-- **Service** — a bookable offering (name, description, duration, active flag) owned by a provider
-- **Slot** — a time window for a service (start/end time, price, booked flag)
+- **Service** — something a provider offers, e.g. a haircut (name, description, duration, active flag)
+- **Slot** — a specific time window when a service can be booked (start/end time, price, availability)
 - **Booking** — a client's reservation of a slot (status: pending / confirmed / cancelled)
 
 **Booking flow**
@@ -192,12 +195,21 @@ python manage.py test
 ---
 
 ## Seed Demo Data
-```bash
-# Local (Docker)
-docker compose exec web python manage.py seed_demo
 
-# Railway (production)
-railway run python manage.py seed_demo
+Populates the database with the demo accounts and data shown in
+[Web Interface — Live Demo](#web-interface--live-demo). Idempotent — safe to re-run.
+
+**Local (Docker)**
+```bash
+docker compose exec web python manage.py seed_demo
 ```
 
-Creates a provider (`testprovider`), a client (`testclient`), a sample service, and slots for the next 7 days. Idempotent — safe to re-run at any time.
+**Railway (production)**
+
+`railway run` can't reach the internal database host, so load the public URL inside a shell:
+```bash
+railway shell --service Postgres
+export DATABASE_URL="$DATABASE_PUBLIC_URL"
+export DJANGO_SETTINGS_MODULE=config.settings.production
+python manage.py seed_demo
+```
