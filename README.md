@@ -164,6 +164,15 @@ via queryset filtering — cross-provider access returns 404, not 403.
 
 ---
 
+## Future Improvements
+
+Documented as the production roadmap — intentionally out of scope for this version.
+
+- **Email notifications** — async booking confirm/cancel emails (Celery + Redis worker, SMTP backend).
+- **Full user registration** — email verification and password reset.
+
+---
+
 ## Local Setup
 
 **Standard**
