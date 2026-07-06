@@ -198,7 +198,7 @@ Runs Django + PostgreSQL + Nginx. API available at `http://localhost`.
 
 ## Running Tests
 ```bash
-python manage.py test
+docker compose exec web python manage.py test
 ```
 
 ---
